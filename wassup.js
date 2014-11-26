@@ -41,7 +41,7 @@ xmpp.on('chat', function(from, message) {
 		xmpp.send(from, "App started");
 		runID = setInterval(function() {		
 			xmpp.send(from, "What are you doing?");
-		}, 10000);
+		}, 1800000);
 	}
 	else if(message == '/stop' && alreadyRun) {
 		clearInterval(runID);

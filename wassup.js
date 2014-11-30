@@ -28,6 +28,10 @@ var xmpp = require('simple-xmpp');
 var argv = process.argv;
 var alreadyRun = false;
 var runID;
+var mongojs = require('mongojs');
+var db = mongojs('mydb', ['myTimeTable']);
+var moment = require('moment');
+var freq = 0.5 //in hours
 
 xmpp.on('online', function() {
 	console.log('Yes, I\'m connected!');
@@ -41,15 +45,25 @@ xmpp.on('chat', function(from, message) {
 		xmpp.send(from, "App started");
 		runID = setInterval(function() {		
 			xmpp.send(from, "What are you doing?");
-		}, 1800000);
+		}, freq*60*60*1000);
 	}
 	else if(message == '/stop' && alreadyRun) {
 		clearInterval(runID);
 		alreadyRun = false;
 		xmpp.send(from, "App stopped");
 	}
+	else if(message.substring(0,5) == '/mute') {
+		var args = message.substring(6);
+		console.log(args);
+		db.myTimeTable.save({time: moment().format(), activity: args});
+		clearInterval(runID);
+		runID = setInterval(function() {		
+			xmpp.send(from, "What are you doing?");
+		}, freq*60*60*1000);
+	}
 	else {
 		console.log(message);
+		db.myTimeTable.save({time: moment().format(), activity: message});
 	}
 });
 
